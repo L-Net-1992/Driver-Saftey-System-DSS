@@ -1,6 +1,11 @@
+/*
+DRIVER SAFTEY SYSTEM- IOT SOLUTION
+Serial1 is for SIM 808
+Serial2 IS FOR HM 10
+*/
 //////////////////////////////////////////For SIM 808
-char dataBuffer[64];
-int dataCount = 0;
+char myBuffer[64];
+int myCount = 0;
 String nmea ;
 String latitude;
 double lat;
@@ -11,7 +16,7 @@ float SS;
 double LocDec;
 double Location(double);
 void BufferData(void);
-void locSender(void);
+void locUpdate(void);
 //////////////////////////////////////////For HM 10
 char c = ' ';
 String result = "";
@@ -39,7 +44,7 @@ loop1:
   Serial2.begin(9600);
   result = "";
   reply = "";
-  Serial2.write("AT");//AT For HM 10
+  Serial2.write("AT");
   delay(500);
   for (int i = 0; i < 2; i++)
   {
@@ -56,9 +61,9 @@ loop1:
     Blue();
     goto loop1;
   }
-  Serial1.write("AT");//For SIM 808
+  Serial1.write("AT");
   delay(1000);
-  Serial1.println("AT+CGPSPWR=1");//get GPS
+  Serial1.println("AT+CGPSPWR=1");
   delay(2000);
   pinMode(lm1, OUTPUT);
   pinMode(lm2, OUTPUT);
@@ -78,7 +83,7 @@ void loop()
     right();
     delay(1000);
     stopv();
-    locSender();
+    locUpdate();
   }
   else if (pulse == 2) {
     Serial.println("Live Zero");
@@ -119,7 +124,7 @@ void widgetRx() {
     pulse = 1;
   }
 }
-void locSender() {
+void locUpdate() {
   Serial1.println("AT+CPIN?");
   delay(1000);
   Serial1.println("AT+CREG?");
@@ -143,13 +148,13 @@ void locSender() {
   BufferData();
   Serial1.println("AT+CGPSINF=0");
   delay(4000);
-  while ( dataCount < 63 ) {
-    dataBuffer[dataCount] = Serial1.read();
-    dataCount++;
+  while ( myCount < 63 ) {
+    myBuffer[myCount] = Serial1.read();
+    myCount++;
   }
-  dataBuffer[dataCount] = 0;
+  myBuffer[myCount] = 0;
   char *output;
-  output = strtok(dataBuffer, ":");
+  output = strtok(myBuffer, ":");
   int field = 0;
   while (output != NULL) {
     field++;

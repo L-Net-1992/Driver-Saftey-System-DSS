@@ -1,4 +1,3 @@
-#include <string.h>
 //////////////////////////////////////////For SIM 808
 char dataBuffer[64];
 int dataCount = 0;
@@ -14,7 +13,6 @@ double Location(double);
 void ShowSerialData(void);
 void locSender(void);
 //////////////////////////////////////////For HM 10
-
 char c = ' ';
 String result = "";
 String reply;
@@ -25,7 +23,6 @@ void widgetRx(void);
 void Red(void);
 void Green(void);
 void Blue(void);
-
 ///////////////////////////////////////parking
 #define lm1 PE_2
 #define lm2 PE_1
@@ -171,7 +168,6 @@ void locSender() {
         lon = longitude.toFloat();
         lon =  Location(lon);
 //lon=0.0;
-
     }
   }
   //  }

@@ -10,7 +10,7 @@ int DD;
 float SS;
 double LocDec;
 double Location(double);
-void ShowSerialData(void);
+void BufferData(void);
 void locSender(void);
 //////////////////////////////////////////For HM 10
 char c = ' ';
@@ -120,33 +120,31 @@ void widgetRx() {
   }
 }
 void locSender() {
-  Serial1.println("AT+CPIN?");//check for the sim card
+  Serial1.println("AT+CPIN?");
   delay(1000);
-  Serial1.println("AT+CREG?");//check for registration and access technology of cell
+  Serial1.println("AT+CREG?");
   delay(1000);
-  Serial1.println("AT+CGATT?");//check whether the device is attached to GPRS.0Detch,1Attch
+  Serial1.println("AT+CGATT?");
   delay(1000);
-  Serial1.println("AT+CIPSHUT");//shut packet data protocol context
+  Serial1.println("AT+CIPSHUT");
   delay(1000);
-  Serial1.println("AT+CIPSTATUS");// returns the current connection status
+  Serial1.println("AT+CIPSTATUS");
   delay(2000);
-  Serial1.println("AT+CIPMUX=0"); //create multi-IP connection(0=single connection)
+  Serial1.println("AT+CIPMUX=0");
   delay(2000);
-  Serial1.println("AT+CSTT=\"airtelgprs.com\"");//start task and setting the APN,
+  Serial1.println("AT+CSTT=\"airtelgprs.com\"");
   delay(1000);
-  Serial1.println("AT+CIICR");//bring up wireless connection
+  Serial1.println("AT+CIICR");
   delay(3000);
-  Serial1.println("AT+CIFSR");//get local IP adress
+  Serial1.println("AT+CIFSR");
   delay(2000);
-  Serial1.println("AT+CGPSSTATUS?");//get GPS
+  Serial1.println("AT+CGPSSTATUS?");
   delay(2000);
-  ShowSerialData();
-  Serial1.println("AT+CGPSINF=0");//get GPS
+  BufferData();
+  Serial1.println("AT+CGPSINF=0");
   delay(4000);
-  //  if (Serial1.available()) {
   while ( dataCount < 63 ) {
     dataBuffer[dataCount] = Serial1.read();
-    //      Serial.print(dataBuffer[dataCount]);
     dataCount++;
   }
   dataBuffer[dataCount] = 0;
@@ -162,31 +160,28 @@ void locSender() {
         latitude = output;
         lat = latitude.toFloat();
         lat =  Location(lat);
-//lat=0.0;
       case 3:
         longitude = output;
         lon = longitude.toFloat();
         lon =  Location(lon);
-//lon=0.0;
     }
   }
-  //  }
-  Serial1.println("AT+CIPSPRT=0");//starts a TCP or UDP connection
+  Serial1.println("AT+CIPSPRT=0");
   delay(3000);
-  Serial1.println("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",\"80\"");//start up the connection
+  Serial1.println("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",\"80\"");
   delay(6000);
-  Serial1.println("AT+CIPSEND");//begin send data to remote server
-  ShowSerialData();
+  Serial1.println("AT+CIPSEND");
+  BufferData();
   delay(4000);
   Serial1.print("GET https://api.thingspeak.com/update?api_key=GY66LRVTCAR5SV43&field3=");
   Serial1.print(lat);
   Serial1.print("&field4=");
   Serial1.println(lon);
   delay(4000);
-  Serial1.println((char)26);//sending
-  delay(5000);//waitting for reply, important! the time is base on the condition of internet
+  Serial1.println((char)26);
+  delay(5000);
   Serial1.println();
-  Serial1.println("AT+CIPSHUT");//close the connection
+  Serial1.println("AT+CIPSHUT");
   delay(100);
 }
 double Location(double loc) {
@@ -243,9 +238,8 @@ void stopv()
   digitalWrite(rm1, LOW);
   digitalWrite(rm2, LOW);
 }
-void ShowSerialData()
+void BufferData()
 {
-  /*SERIAL DATA READER FOR SIM 808*/
   while (Serial1.available() != 0) {
     Serial.write(Serial1.read());
   }

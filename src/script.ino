@@ -1,7 +1,7 @@
 /*
-DRIVER SAFTEY SYSTEM- IOT SOLUTION
-Serial1 is for SIM 808
-Serial2 IS FOR HM 10
+  DRIVER SAFTEY SYSTEM- IOT SOLUTION
+  Serial1 is for SIM 808
+  Serial2 IS FOR HM 10
 */
 //////////////////////////////////////////For SIM 808 Module
 char myBuffer[64];
@@ -29,6 +29,17 @@ void Red(void);
 void Green(void);
 void Blue(void);
 ///////////////////////////////////////parking
+#include <Servo.h>
+Servo myservo;
+int ir = 0;
+int pos = 0;
+int flagv = 0;
+bool parkCount = false;
+
+
+#define irPin PE_5
+#define ledPin PC_7
+#define SrPin PC_4
 #define lm1 PE_2
 #define lm2 PE_1
 #define rm1 PE_3
@@ -61,29 +72,41 @@ loop1:
     Blue();
     goto loop1;
   }
-  Serial1.write("AT");
-  delay(1000);
-  Serial1.println("AT+CGPSPWR=1");
-  delay(2000);
+
   pinMode(lm1, OUTPUT);
   pinMode(lm2, OUTPUT);
   pinMode(rm1, OUTPUT);
   pinMode(rm2, OUTPUT);
-  pinMode(PC_7,OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  myservo.attach(SrPin);
+  myservo.write(5);
+
+  Serial1.write("AT");
+  delay(1200);
+  BufferData();
+  Serial1.println("AT+CGPSPWR=1");
+  delay(2000);
+  BufferData();
 }
 void loop()
 {
+  //  digitalWrite(ledPin, LOW);
   widgetRx();
   if (pulse != 1 and pulse != 2 ) {
     Serial.print("Danger. Pulse Is: Low ");
     Red();
-    digitalWrite(PC_7,HIGH);
-    left();
-    delay(700);
-    right();
-    delay(1000);
-    stopv();
-    locUpdate();
+    //    digitalWrite(ledPin,HIGH);
+    //    left();
+    //    delay(700);
+    //    right();
+    //    delay(1000);
+    //    stopv();
+    if (parkCount == false) {
+      vehicle();
+    }
+    else {
+      locUpdate();
+    }
   }
   else if (pulse == 2) {
     Serial.println("Live Zero");
@@ -127,22 +150,31 @@ void widgetRx() {
 void locUpdate() {
   Serial1.println("AT+CPIN?");
   delay(1000);
+  BufferData();
   Serial1.println("AT+CREG?");
   delay(1000);
+  BufferData();
   Serial1.println("AT+CGATT?");
   delay(1000);
+  BufferData();
   Serial1.println("AT+CIPSHUT");
   delay(1000);
+  BufferData();
   Serial1.println("AT+CIPSTATUS");
   delay(2000);
+  BufferData();
   Serial1.println("AT+CIPMUX=0");
   delay(2000);
+  BufferData();
   Serial1.println("AT+CSTT=\"airtelgprs.com\"");
   delay(1000);
+  BufferData();
   Serial1.println("AT+CIICR");
   delay(3000);
+  BufferData();
   Serial1.println("AT+CIFSR");
   delay(2000);
+  BufferData();
   Serial1.println("AT+CGPSSTATUS?");
   delay(2000);
   BufferData();
@@ -165,14 +197,21 @@ void locUpdate() {
         latitude = output;
         lat = latitude.toFloat();
         lat =  Location(lat);
+        Serial.print(field);
+        Serial.print("->");
+        Serial.println(lat);
       case 3:
         longitude = output;
         lon = longitude.toFloat();
         lon =  Location(lon);
+        Serial.print(field);
+        Serial.print("->");
+        Serial.println(lon);
     }
   }
   Serial1.println("AT+CIPSPRT=0");
   delay(3000);
+  BufferData();
   Serial1.println("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",\"80\"");
   delay(6000);
   Serial1.println("AT+CIPSEND");
@@ -188,6 +227,8 @@ void locUpdate() {
   Serial1.println();
   Serial1.println("AT+CIPSHUT");
   delay(100);
+  BufferData();
+
 }
 double Location(double loc) {
   /*NMEA LOCATION EXTRACTOR */
@@ -248,4 +289,69 @@ void BufferData()
   while (Serial1.available() != 0) {
     Serial.write(Serial1.read());
   }
+}
+void vehicle()
+{
+  digitalWrite(ledPin, LOW);
+  myservo.write(5);
+  ir = analogRead(irPin);
+  Serial.println(ir);
+  flagv = 0;
+  while (ir > 1600)
+  {
+    ir = analogRead(irPin);
+    if (flagv == 0)
+    {
+      digitalWrite(ledPin, HIGH);
+      Serial.println("indication and data passed(flagv is set to 1)");
+      stopv();
+      locUpdate();
+      Serial.println("data uploaded not parked ");
+      flagv = 1;
+    }
+    else if (flagv == 1) {
+      stopv();
+    }
+  }
+  if (ir < 1550)
+  {
+    Serial.println("Front OK.Turning servo left...");
+    digitalWrite(ledPin, HIGH);
+    for (pos = 5; pos < 95; pos++) {
+      myservo.write(pos);
+      delay(20);
+    }
+    Serial.println("servo 90 rotated");
+    delay (500);
+    ir = analogRead(irPin);
+    while (ir > 1600)
+    {
+      Serial.println("obstacle present in left. moving forward");
+      ir = analogRead(irPin);
+      forward();
+      Serial.println(ir);
+    }
+    if (ir < 1550)
+    {
+      Serial.println("going to park");
+      left();
+      delay(1000);
+      right();
+      delay(700);
+      forward();
+      delay(400);
+      right();
+      delay(570);
+      stopv();
+      Serial.println("parking completed");
+      locUpdate();
+      Serial.println("data update completed");
+    }
+  }
+  for (pos = 94; pos > 4; pos--)
+  {
+    myservo.write(pos);
+    delay(20);
+  }
+  parkCount = true;
 }

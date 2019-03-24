@@ -72,7 +72,6 @@ loop1:
     Blue();
     goto loop1;
   }
-
   pinMode(lm1, OUTPUT);
   pinMode(lm2, OUTPUT);
   pinMode(rm1, OUTPUT);
@@ -192,7 +191,6 @@ void locUpdate() {
         latitude = output;
         lat = latitude.toFloat();
         lat =  Location(lat);
-        // lat = 0.0;
         Serial.print(field);
         Serial.print("->");
         Serial.println(lat);
@@ -200,7 +198,6 @@ void locUpdate() {
         longitude = output;
         lon = longitude.toFloat();
         lon =  Location(lon);
-        // lon = 0.0;
 
         Serial.print(field);
         Serial.print("->");

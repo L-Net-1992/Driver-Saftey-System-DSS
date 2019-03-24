@@ -95,12 +95,7 @@ void loop()
   if (pulse != 1 and pulse != 2 ) {
     Serial.print("Danger. Pulse Is: Low ");
     Red();
-    //    digitalWrite(ledPin,HIGH);
-    //    left();
-    //    delay(700);
-    //    right();
-    //    delay(1000);
-    //    stopv();
+
     if (parkCount == false) {
       vehicle();
     }
@@ -197,6 +192,7 @@ void locUpdate() {
         latitude = output;
         lat = latitude.toFloat();
         lat =  Location(lat);
+        // lat = 0.0;
         Serial.print(field);
         Serial.print("->");
         Serial.println(lat);
@@ -204,6 +200,8 @@ void locUpdate() {
         longitude = output;
         lon = longitude.toFloat();
         lon =  Location(lon);
+        // lon = 0.0;
+
         Serial.print(field);
         Serial.print("->");
         Serial.println(lon);
@@ -297,7 +295,7 @@ void vehicle()
   ir = analogRead(irPin);
   Serial.println(ir);
   flagv = 0;
-  while (ir > 1600)
+  while (ir >= 1600)
   {
     ir = analogRead(irPin);
     if (flagv == 0)
@@ -313,7 +311,7 @@ void vehicle()
       stopv();
     }
   }
-  if (ir < 1550)
+  if (ir < 1600)
   {
     Serial.println("Front OK.Turning servo left...");
     digitalWrite(ledPin, HIGH);
@@ -324,14 +322,14 @@ void vehicle()
     Serial.println("servo 90 rotated");
     delay (500);
     ir = analogRead(irPin);
-    while (ir > 1600)
+    while (ir >= 1600)
     {
       Serial.println("obstacle present in left. moving forward");
       ir = analogRead(irPin);
       forward();
       Serial.println(ir);
     }
-    if (ir < 1550)
+    if (ir < 1600)
     {
       Serial.println("going to park");
       left();
@@ -339,6 +337,7 @@ void vehicle()
       right();
       delay(700);
       forward();
+
       delay(400);
       right();
       delay(570);

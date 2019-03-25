@@ -1,8 +1,8 @@
 git commit -a
 /*
   DRIVER SAFTEY SYSTEM- IOT SOLUTION
-  Serial1 is for SIM 808 
-  Serial2 IS FOR HM 10
+  Serial1 is for SIM 808
+  Serial2 IS FOR HM-10
 */
 //////////////////////////////////////////For SIM 808 Module
 char myBuffer[64];
